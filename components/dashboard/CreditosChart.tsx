@@ -18,12 +18,13 @@ import { CreditoSegmento } from '@/lib/queries'
 
 interface Props {
   data: CreditoSegmento[]
+  currentLabel: string
 }
 
 // Paleta CMAC Trujillo
 const PALETTE = ['#f47920', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 
-export default function CreditosChart({ data }: Props) {
+export default function CreditosChart({ data, currentLabel }: Props) {
   const barData = data.map((d, i) => ({
     name: d.nombre.split(' ')[0],
     'Cartera (S/M)': d.cartera_mm,
@@ -49,7 +50,7 @@ export default function CreditosChart({ data }: Props) {
     <div className="bg-card rounded-xl p-5 kpi-card-glow">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-foreground">Cartera por Segmento Crediticio</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Distribución S/ millones · Mora % por segmento</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Distribución S/ millones · Mora % por segmento · {currentLabel}</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

@@ -19,6 +19,10 @@ interface KpiItem {
   trend: 'up' | 'down' | 'neutral'
 }
 
+const wholeNumber = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0,
+})
+
 function fmt(n: number, prev: number | undefined, suffix: string, higherIsBad = false): string | undefined {
   if (prev === undefined) return undefined
   const d = n - prev
@@ -81,7 +85,7 @@ export default function KpiCards({ kpis, prev }: Props) {
     },
     {
       label: 'Cartera Bruta',
-      value: `S/ ${kpis.cartera_bruta_mm.toLocaleString()}M`,
+      value: `S/ ${wholeNumber.format(kpis.cartera_bruta_mm)}M`,
       sub: 'Saldo total créditos',
       delta: prev ? `${kpis.cartera_bruta_mm >= prev.cartera_bruta_mm ? '+' : ''}${(kpis.cartera_bruta_mm - prev.cartera_bruta_mm).toFixed(0)}M` : undefined,
       deltaPos: prev ? kpis.cartera_bruta_mm >= prev.cartera_bruta_mm : undefined,

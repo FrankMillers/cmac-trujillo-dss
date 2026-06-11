@@ -17,12 +17,13 @@ import { TransaccionCanal } from '@/lib/queries'
 
 interface Props {
   data: TransaccionCanal[]
+  currentLabel: string
 }
 
 // Paleta CMAC Trujillo
 const PALETTE = ['#f47920', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 
-export default function CanalesChart({ data }: Props) {
+export default function CanalesChart({ data, currentLabel }: Props) {
   const pieData = data.map((d, i) => ({
     name: d.nombre,
     value: d.num_transacciones_miles,
@@ -50,7 +51,7 @@ export default function CanalesChart({ data }: Props) {
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-foreground">Adopción Digital por Canal</h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Transacciones (miles) y montos · Mar 2025 · Total: {total.toFixed(0)}k transacciones
+          Transacciones (miles) y montos · {currentLabel} · Total: {total.toFixed(0)}k transacciones
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

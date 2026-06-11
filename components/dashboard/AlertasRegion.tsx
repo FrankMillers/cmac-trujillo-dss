@@ -6,6 +6,8 @@ import { TrendingDown, TrendingUp } from 'lucide-react'
 
 interface Props {
   data: AlertaRegion[]
+  currentLabel: string
+  selectedRegionId?: number
 }
 
 const nivelColor: Record<string, string> = {
@@ -22,18 +24,23 @@ const moraBarColor: Record<string, string> = {
   Bajo: 'bg-emerald-500',
 }
 
-export default function AlertasRegion({ data }: Props) {
+export default function AlertasRegion({ data, currentLabel, selectedRegionId }: Props) {
   const maxMora = Math.max(...data.map((d) => d.morosidad_pct))
 
   return (
     <div className="bg-card rounded-xl p-5 kpi-card-glow-red">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-foreground">Mapa de Riesgo Regional</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Morosidad por región · Mar 2025 · Variación vs mes anterior</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Morosidad por región · {currentLabel} · Variación vs mes anterior</p>
       </div>
       <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
         {data.map((r) => (
-          <div key={r.id_region} className="flex items-center gap-3 group">
+          <div
+            key={r.id_region}
+            className={`flex items-center gap-3 group rounded-lg px-2 py-1.5 transition-colors ${
+              r.id_region === selectedRegionId ? 'bg-primary/10 ring-1 ring-primary/30' : ''
+            }`}
+          >
             <div className="w-28 shrink-0">
               <span className="text-xs font-medium text-foreground truncate block">{r.nombre}</span>
               <span className="text-xs text-muted-foreground">{r.agencias} agencias</span>

@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { supabase } from './supabase'
 
 export interface IndicadorMensual {
@@ -53,6 +55,33 @@ export interface KpiActual {
   patrimonio_mm: number
 }
 
+export async function getDashboardMonthIds(): Promise<number[]> {
+  const [indicadoresRes, creditosRes, canalesRes, alertasRes] = await Promise.all([
+    supabase.from('fact_indicadores_mensual').select('id_tiempo'),
+    supabase.from('fact_creditos_segmento').select('id_tiempo, dim_segmento!inner(nombre)'),
+    supabase.from('fact_transacciones_mensual').select('id_tiempo, dim_canal!inner(nombre)'),
+    supabase.from('fact_alertas_region').select('id_tiempo, dim_region!inner(nombre)'),
+  ])
+
+  for (const result of [indicadoresRes, creditosRes, canalesRes, alertasRes]) {
+    if (result.error) throw result.error
+  }
+
+  const indicadorIds = (indicadoresRes.data ?? []).map((row) => row.id_tiempo)
+  const creditoIds = (creditosRes.data ?? []).map((row) => row.id_tiempo)
+  const canalIds = (canalesRes.data ?? []).map((row) => row.id_tiempo)
+  const alertaIds = (alertasRes.data ?? []).map((row) => row.id_tiempo)
+
+  const sets = [
+    new Set(indicadorIds),
+    new Set(creditoIds),
+    new Set(canalIds),
+    new Set(alertaIds),
+  ]
+
+  return [...sets[0]].filter((id) => sets.every((set) => set.has(id))).sort((a, b) => a - b)
+}
+
 export async function getIndicadoresMensuales(): Promise<IndicadorMensual[]> {
   const { data, error } = await supabase
     .from('fact_indicadores_mensual')
@@ -88,14 +117,14 @@ export async function getCreditosPorSegmento(idTiempo: number): Promise<CreditoS
   })) as CreditoSegmento[]
 }
 
-export async function getTransaccionesPorCanal(): Promise<TransaccionCanal[]> {
+export async function getTransaccionesPorCanal(idTiempo: number): Promise<TransaccionCanal[]> {
   const { data, error } = await supabase
     .from('fact_transacciones_mensual')
     .select(`
       id_canal, num_transacciones_miles, monto_total_mm, ticket_promedio_soles,
       dim_canal!inner(nombre, tipo)
     `)
-    .eq('id_tiempo', 24)
+    .eq('id_tiempo', idTiempo)
 
   if (error) throw error
   return data.map((r: Record<string, unknown>) => {
@@ -104,7 +133,7 @@ export async function getTransaccionesPorCanal(): Promise<TransaccionCanal[]> {
   }) as TransaccionCanal[]
 }
 
-export async function getAlertasRegion(): Promise<AlertaRegion[]> {
+export async function getAlertasRegion(idTiempo: number): Promise<AlertaRegion[]> {
   const { data, error } = await supabase
     .from('fact_alertas_region')
     .select(`
@@ -112,7 +141,7 @@ export async function getAlertasRegion(): Promise<AlertaRegion[]> {
       nivel_riesgo, variacion_mora_pp,
       dim_region!inner(nombre, agencias, macrozona)
     `)
-    .eq('id_tiempo', 24)
+    .eq('id_tiempo', idTiempo)
     .order('morosidad_pct', { ascending: false })
 
   if (error) throw error

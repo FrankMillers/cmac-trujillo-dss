@@ -15,6 +15,7 @@ import { IndicadorMensual } from '@/lib/queries'
 
 interface Props {
   data: IndicadorMensual[]
+  rangeLabel: string
 }
 
 // Paleta CMAC Trujillo
@@ -25,7 +26,7 @@ const COLORS = {
   sistema: '#f59e0b',  // ámbar (referencia sistema)
 }
 
-export default function EvolucionChart({ data }: Props) {
+export default function EvolucionChart({ data, rangeLabel }: Props) {
   const chartData = data.map((d) => ({
     mes: d.mes_anio,
     ROE: d.roe_pct,
@@ -38,7 +39,7 @@ export default function EvolucionChart({ data }: Props) {
     <div className="bg-card rounded-xl p-5 kpi-card-glow">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-foreground">Evolución de Indicadores Clave</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Abr 2023 – Mar 2025 · ROE, Morosidad vs Sistema</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{rangeLabel} · ROE, Morosidad vs Sistema</p>
       </div>
       <ResponsiveContainer width="100%" height={280}>
         <ComposedChart data={chartData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>

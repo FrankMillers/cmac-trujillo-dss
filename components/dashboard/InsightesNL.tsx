@@ -5,6 +5,8 @@ interface Props {
   indicadores: IndicadorMensual[]
   alertas: AlertaRegion[]
   creditos: CreditoSegmento[]
+  currentLabel: string
+  selectedRegionName?: string
 }
 
 interface Insight {
@@ -13,13 +15,17 @@ interface Insight {
   texto: string
 }
 
+const wholeNumber = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 0,
+})
+
 function generarInsights(
   indicadores: IndicadorMensual[],
   alertas: AlertaRegion[],
   creditos: CreditoSegmento[]
 ): Insight[] {
   const actual = indicadores[indicadores.length - 1]
-  const anterior = indicadores[indicadores.length - 2]
+  const anterior = indicadores[indicadores.length - 2] ?? actual
   const insights: Insight[] = []
 
   // 1. Morosidad vs sistema
@@ -57,7 +63,7 @@ function generarInsights(
     insights.push({
       tipo: 'positivo',
       titulo: 'Expansión de cartera',
-      texto: `La cartera bruta creció S/ ${deltaCartera.toFixed(0)}M (+${pctCartera}%) respecto al mes anterior, alcanzando S/ ${actual.cartera_bruta_mm.toLocaleString()}M. El segmento ${topSeg?.nombre ?? 'microempresa'} lidera con S/ ${topSeg?.cartera_mm.toLocaleString()}M y ${topSeg?.num_clientes.toLocaleString()} clientes.`,
+      texto: `La cartera bruta creció S/ ${deltaCartera.toFixed(0)}M (+${pctCartera}%) respecto al mes anterior, alcanzando S/ ${wholeNumber.format(actual.cartera_bruta_mm)}M. El segmento ${topSeg?.nombre ?? 'microempresa'} lidera con S/ ${wholeNumber.format(topSeg?.cartera_mm ?? 0)}M y ${wholeNumber.format(topSeg?.num_clientes ?? 0)} clientes.`,
     })
   } else {
     insights.push({
@@ -117,7 +123,7 @@ const tipoStyle = {
   },
 }
 
-export default function InsightesNL({ indicadores, alertas, creditos }: Props) {
+export default function InsightesNL({ indicadores, alertas, creditos, currentLabel, selectedRegionName }: Props) {
   const insights = generarInsights(indicadores, alertas, creditos)
 
   return (
@@ -126,7 +132,10 @@ export default function InsightesNL({ indicadores, alertas, creditos }: Props) {
         <Zap className="w-4 h-4 text-primary" />
         <div>
           <h2 className="text-sm font-semibold text-foreground">Análisis en Lenguaje Natural</h2>
-          <p className="text-xs text-muted-foreground">Generado automáticamente · Datos Mar 2025 · DSS CMAC Trujillo</p>
+          <p className="text-xs text-muted-foreground">Generado automáticamente · Datos {currentLabel} · DSS CMAC Trujillo</p>
+          {selectedRegionName ? (
+            <p className="text-xs text-primary mt-0.5">Foco territorial activo: {selectedRegionName}</p>
+          ) : null}
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
