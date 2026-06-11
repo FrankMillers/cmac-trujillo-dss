@@ -1,11 +1,14 @@
 'use client'
 
+import { useTransition } from 'react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { TrendingUp, TrendingDown, Shield, AlertTriangle, DollarSign, Landmark, Minus } from 'lucide-react'
 import { KpiActual } from '@/lib/queries'
 
 interface Props {
   kpis: KpiActual
   prev?: KpiActual
+  onSelectFocus?: (focus: string) => void
 }
 
 interface KpiItem {
@@ -15,8 +18,11 @@ interface KpiItem {
   delta?: string
   deltaPos?: boolean
   icon: React.ReactNode
-  glow: string
-  trend: 'up' | 'down' | 'neutral'
+  surface: string
+  iconWrap: string
+  deltaWrap: string
+  progress?: number   // 0-100 para barra inferior
+  critical?: boolean  // pulso en delta negativo
 }
 
 const wholeNumber = new Intl.NumberFormat('en-US', {
@@ -31,7 +37,34 @@ function fmt(n: number, prev: number | undefined, suffix: string, higherIsBad = 
   return `${sign}${d.toFixed(2)}${suffix}`
 }
 
-export default function KpiCards({ kpis, prev }: Props) {
+const kpiFocusMap: Record<string, string> = {
+  'ROE': 'rentabilidad',
+  'ROA': 'rentabilidad',
+  'Patrimonio': 'rentabilidad',
+  'Cartera Bruta': 'rentabilidad',
+  'Morosidad': 'riesgo',
+  'Ratio Capital Global': 'riesgo',
+  'Cobertura Provisiones': 'riesgo',
+}
+
+export default function KpiCards({ kpis, prev, onSelectFocus }: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isPending, startTransition] = useTransition()
+
+  const handleSelectFocus = (newFocus: string) => {
+    if (onSelectFocus) {
+      onSelectFocus(newFocus)
+      return
+    }
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('focus', newFocus)
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    })
+  }
+
   const items: KpiItem[] = [
     {
       label: 'ROE',
@@ -40,8 +73,10 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: fmt(kpis.roe_pct, prev?.roe_pct, 'pp'),
       deltaPos: prev ? kpis.roe_pct >= prev.roe_pct : undefined,
       icon: <TrendingUp className="w-5 h-5" />,
-      glow: 'kpi-card-glow-green',
-      trend: 'up',
+      surface: 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white shadow-lg shadow-emerald-950/40',
+      iconWrap: 'bg-white/18 text-white',
+      deltaWrap: 'bg-white/14 text-emerald-50',
+      progress: Math.min(100, (kpis.roe_pct / 20) * 100),
     },
     {
       label: 'ROA',
@@ -50,8 +85,10 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: fmt(kpis.roa_pct, prev?.roa_pct, 'pp'),
       deltaPos: prev ? kpis.roa_pct >= prev.roa_pct : undefined,
       icon: <DollarSign className="w-5 h-5" />,
-      glow: 'kpi-card-glow-green',
-      trend: 'up',
+      surface: 'bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-lg shadow-teal-950/40',
+      iconWrap: 'bg-white/18 text-white',
+      deltaWrap: 'bg-white/14 text-teal-50',
+      progress: Math.min(100, (kpis.roa_pct / 3) * 100),
     },
     {
       label: 'Ratio Capital Global',
@@ -60,8 +97,10 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: fmt(kpis.ratio_capital_global, prev?.ratio_capital_global, 'pp'),
       deltaPos: prev ? kpis.ratio_capital_global >= prev.ratio_capital_global : undefined,
       icon: <Shield className="w-5 h-5" />,
-      glow: 'kpi-card-glow',
-      trend: 'neutral',
+      surface: 'bg-gradient-to-br from-sky-600 to-sky-800 text-white shadow-lg shadow-sky-950/40',
+      iconWrap: 'bg-white/18 text-white',
+      deltaWrap: 'bg-white/14 text-sky-50',
+      progress: Math.min(100, ((kpis.ratio_capital_global - 10) / 10) * 100),
     },
     {
       label: 'Morosidad',
@@ -70,8 +109,11 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: fmt(kpis.morosidad_pct, prev?.morosidad_pct, 'pp', true),
       deltaPos: prev ? kpis.morosidad_pct <= prev.morosidad_pct : undefined,
       icon: <AlertTriangle className="w-5 h-5" />,
-      glow: 'kpi-card-glow-red',
-      trend: 'down',
+      surface: 'bg-gradient-to-br from-rose-600 to-rose-800 text-white shadow-lg shadow-rose-950/40',
+      iconWrap: 'bg-white/18 text-white',
+      deltaWrap: 'bg-white/14 text-rose-50',
+      progress: Math.min(100, (kpis.morosidad_pct / 20) * 100),
+      critical: prev ? kpis.morosidad_pct > prev.morosidad_pct : false,
     },
     {
       label: 'Cobertura Provisiones',
@@ -80,8 +122,10 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: fmt(kpis.cobertura_provisiones, prev?.cobertura_provisiones, 'pp'),
       deltaPos: prev ? kpis.cobertura_provisiones >= prev.cobertura_provisiones : undefined,
       icon: <Shield className="w-5 h-5" />,
-      glow: 'kpi-card-glow-amber',
-      trend: 'neutral',
+      surface: 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 shadow-lg shadow-amber-950/30',
+      iconWrap: 'bg-slate-950/14 text-slate-950',
+      deltaWrap: 'bg-slate-950/10 text-slate-900',
+      progress: Math.min(100, (kpis.cobertura_provisiones / 200) * 100),
     },
     {
       label: 'Cartera Bruta',
@@ -90,8 +134,9 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: prev ? `${kpis.cartera_bruta_mm >= prev.cartera_bruta_mm ? '+' : ''}${(kpis.cartera_bruta_mm - prev.cartera_bruta_mm).toFixed(0)}M` : undefined,
       deltaPos: prev ? kpis.cartera_bruta_mm >= prev.cartera_bruta_mm : undefined,
       icon: <Landmark className="w-5 h-5" />,
-      glow: 'kpi-card-glow',
-      trend: 'up',
+      surface: 'bg-gradient-to-br from-orange-400 to-orange-600 text-slate-950 shadow-lg shadow-orange-950/30',
+      iconWrap: 'bg-slate-950/14 text-slate-950',
+      deltaWrap: 'bg-slate-950/10 text-slate-900',
     },
     {
       label: 'Patrimonio',
@@ -100,45 +145,57 @@ export default function KpiCards({ kpis, prev }: Props) {
       delta: prev ? `${kpis.patrimonio_mm >= prev.patrimonio_mm ? '+' : ''}${(kpis.patrimonio_mm - prev.patrimonio_mm).toFixed(1)}M` : undefined,
       deltaPos: prev ? kpis.patrimonio_mm >= prev.patrimonio_mm : undefined,
       icon: <Landmark className="w-5 h-5" />,
-      glow: 'kpi-card-glow',
-      trend: 'up',
+      surface: 'bg-gradient-to-br from-violet-600 to-violet-800 text-white shadow-lg shadow-violet-950/40',
+      iconWrap: 'bg-white/18 text-white',
+      deltaWrap: 'bg-white/14 text-violet-50',
     },
   ]
 
-  const trendColor = {
-    up: 'text-emerald-400',
-    down: 'text-red-400',
-    neutral: 'text-blue-400',
-  }
-
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
-      {items.map((item) => (
+      {items.map((item, idx) => (
         <div
           key={item.label}
-          className={`bg-card rounded-xl p-4 ${item.glow} flex flex-col gap-2 min-w-0`}
+          className={`${item.surface} rounded-2xl p-4 flex flex-col gap-3 min-w-0 border border-white/10 kpi-card-interactive cursor-pointer animate-fade-in-up`}
+          style={{ animationDelay: `${idx * 0.05}s` }}
+          onClick={() => handleSelectFocus(kpiFocusMap[item.label] ?? 'rentabilidad')}
         >
-          <div className={`${trendColor[item.trend]} flex items-center gap-1`}>
-            {item.icon}
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-foreground leading-none">{item.value}</div>
-            <div className="text-xs text-muted-foreground mt-1">{item.label}</div>
-          </div>
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-xs text-muted-foreground truncate">{item.sub}</span>
-            {item.delta && (
-              <span className={`text-xs font-semibold shrink-0 flex items-center gap-0.5 ${item.deltaPos ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div className="flex items-start justify-between gap-2">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.iconWrap} shrink-0`}>
+              {item.icon}
+            </div>
+            {item.delta ? (
+              <span
+                className={`text-xs font-semibold shrink-0 flex items-center gap-1 rounded-full px-2 py-1 ${item.deltaWrap} ${
+                  item.critical ? 'animate-pulse' : ''
+                }`}
+              >
                 {item.deltaPos ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {item.delta}
               </span>
-            )}
-            {!item.delta && (
-              <span className="text-xs text-muted-foreground shrink-0 flex items-center gap-0.5">
+            ) : (
+              <span className={`text-xs shrink-0 flex items-center gap-1 rounded-full px-2 py-1 ${item.deltaWrap}`}>
                 <Minus className="w-3 h-3" />
               </span>
             )}
           </div>
+
+          <div>
+            <div className="text-3xl font-bold leading-none tracking-tight">{item.value}</div>
+            <div className="text-xs mt-1.5 uppercase tracking-[0.14em] opacity-75 font-medium">{item.label}</div>
+          </div>
+
+          <div className="text-xs leading-relaxed opacity-80">{item.sub}</div>
+
+          {/* Barra de progreso inferior */}
+          {item.progress !== undefined && (
+            <div className="mt-auto h-1 w-full rounded-full bg-black/15 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-white/50 transition-all duration-700"
+                style={{ width: `${Math.max(4, item.progress)}%` }}
+              />
+            </div>
+          )}
         </div>
       ))}
     </div>

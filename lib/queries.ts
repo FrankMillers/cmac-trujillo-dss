@@ -24,6 +24,11 @@ export interface CreditoSegmento {
   credito_promedio_soles: number
 }
 
+export interface CreditosSnapshot {
+  id_tiempo: number
+  data: CreditoSegmento[]
+}
+
 export interface TransaccionCanal {
   id_canal: number
   nombre: string
@@ -117,6 +122,41 @@ export async function getCreditosPorSegmento(idTiempo: number): Promise<CreditoS
   })) as CreditoSegmento[]
 }
 
+export async function getCreditosSnapshots(): Promise<CreditosSnapshot[]> {
+  const { data, error } = await supabase
+    .from('fact_creditos_segmento')
+    .select(`
+      id_tiempo, id_segmento, cartera_mm, mora_pct, num_clientes, credito_promedio_soles,
+      dim_segmento!inner(nombre)
+    `)
+    .order('id_tiempo')
+    .order('id_segmento')
+
+  if (error) throw error
+
+  const grouped = new Map<number, CreditoSegmento[]>()
+  for (const row of data as Record<string, unknown>[]) {
+    const id_tiempo = row.id_tiempo as number
+    const item = {
+      id_segmento: row.id_segmento as number,
+      nombre: (row.dim_segmento as { nombre: string }).nombre,
+      cartera_mm: row.cartera_mm as number,
+      mora_pct: row.mora_pct as number,
+      num_clientes: row.num_clientes as number,
+      credito_promedio_soles: row.credito_promedio_soles as number,
+    } satisfies CreditoSegmento
+
+    const current = grouped.get(id_tiempo) ?? []
+    current.push(item)
+    grouped.set(id_tiempo, current)
+  }
+
+  return [...grouped.entries()].map(([id_tiempo, groupedData]) => ({
+    id_tiempo,
+    data: groupedData,
+  }))
+}
+
 export async function getTransaccionesPorCanal(idTiempo: number): Promise<TransaccionCanal[]> {
   const { data, error } = await supabase
     .from('fact_transacciones_mensual')
@@ -149,6 +189,10 @@ export async function getAlertasRegion(idTiempo: number): Promise<AlertaRegion[]
     const reg = r.dim_region as { nombre: string; agencias: number; macrozona: string }
     return { ...r, nombre: reg.nombre, agencias: reg.agencias, macrozona: reg.macrozona }
   }) as AlertaRegion[]
+}
+
+export async function getAlertasRegionBase(): Promise<AlertaRegion[]> {
+  return getAlertasRegion(24)
 }
 
 export async function getKpisActuales(idTiempo = 24): Promise<KpiActual> {

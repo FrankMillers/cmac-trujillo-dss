@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -7,9 +8,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Segoe UI', 'IBM Plex Sans', sans-serif;
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
   --font-mono: 'Consolas', 'IBM Plex Mono', monospace;
-  --font-heading: 'Segoe UI', 'IBM Plex Sans', sans-serif;
+  --font-heading: 'Inter', 'Segoe UI', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,7 +48,7 @@
 
 /* ─── CMAC TRUJILLO · TEMA CLARO (default) ─── */
 :root {
-  --background: oklch(0.96 0.006 55);        /* cálido suave */
+  --background: oklch(0.98 0.003 240);        /* gris slate/zinc muy suave y ejecutivo */
   --foreground: oklch(0.14 0.018 255);        /* azul oscuro casi negro */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.14 0.018 255);
@@ -55,15 +56,15 @@
   --popover-foreground: oklch(0.14 0.018 255);
   --primary: oklch(0.63 0.17 48);             /* naranja CMAC #f47920 */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.92 0.01 55);
+  --secondary: oklch(0.94 0.004 240);
   --secondary-foreground: oklch(0.25 0.02 255);
-  --muted: oklch(0.93 0.008 55);
-  --muted-foreground: oklch(0.50 0.018 240);
+  --muted: oklch(0.95 0.003 240);
+  --muted-foreground: oklch(0.45 0.015 240);
   --accent: oklch(0.63 0.17 48);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.55 0.22 25);
-  --border: oklch(0 0 0 / 9%);
-  --input: oklch(0 0 0 / 7%);
+  --border: oklch(0.14 0.018 255 / 8%);
+  --input: oklch(0.14 0.018 255 / 6%);
   --ring: oklch(0.63 0.17 48);
   /* Paleta gráficos – identidad CMAC Trujillo */
   --chart-1: oklch(0.63 0.17 48);   /* naranja corporativo */
@@ -72,13 +73,13 @@
   --chart-4: oklch(0.72 0.16 85);   /* ámbar dorado */
   --chart-5: oklch(0.60 0.18 310);  /* violeta */
   --radius: 0.75rem;
-  --sidebar: oklch(0.94 0.008 55);
+  --sidebar: oklch(0.96 0.003 240);
   --sidebar-foreground: oklch(0.14 0.018 255);
   --sidebar-primary: oklch(0.63 0.17 48);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.90 0.01 55);
+  --sidebar-accent: oklch(0.92 0.004 240);
   --sidebar-accent-foreground: oklch(0.25 0.02 255);
-  --sidebar-border: oklch(0 0 0 / 9%);
+  --sidebar-border: oklch(0.14 0.018 255 / 8%);
   --sidebar-ring: oklch(0.63 0.17 48);
 }
 
@@ -124,9 +125,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' auto;
   }
   html {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -143,3 +148,182 @@
 .kpi-card-glow-amber {
   box-shadow: 0 0 0 1px oklch(0.72 0.16 85 / 22%), 0 4px 20px oklch(0.72 0.16 85 / 10%);
 }
+
+/* ─── Glassmorphism card ─── */
+.glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .glass-card {
+  background: oklch(0.14 0.022 258 / 70%);
+  border: 1px solid oklch(1 0 0 / 8%);
+  box-shadow: 0 8px 32px oklch(0 0 0 / 30%), 0 0 0 1px oklch(0.70 0.17 48 / 10%);
+}
+.light .glass-card, :root:not(.dark) .glass-card {
+  background: oklch(1 0 0 / 80%);
+  border: 1px solid oklch(0 0 0 / 8%);
+  box-shadow: 0 8px 32px oklch(0.14 0.018 255 / 8%);
+}
+
+/* ─── Animaciones de entrada ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-fade-in {
+  animation: fadeIn 0.35s ease both;
+}
+.animate-slide-in {
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delays para listas */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.30s; }
+.stagger-7 { animation-delay: 0.35s; }
+
+/* ─── Custom scrollbar ─── */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.63 0.17 48 / 35%);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.63 0.17 48 / 60%);
+}
+
+/* ─── Select estilizado ─── */
+.select-styled {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.2rem !important;
+  cursor: pointer;
+  background-color: var(--secondary) !important;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+.select-styled:focus {
+  outline: none;
+  background-color: var(--background) !important;
+  box-shadow: 0 0 0 2px oklch(0.63 0.17 48 / 25%);
+  border-color: oklch(0.63 0.17 48 / 50%);
+}
+.select-styled:hover {
+  background-color: oklch(0.92 0.005 240) !important;
+  border-color: oklch(0.63 0.17 48 / 40%);
+}
+.dark .select-styled:hover {
+  background-color: oklch(0.18 0.02 258) !important;
+}
+
+/* ─── Table enhanced ─── */
+.table-premium tbody tr {
+  transition: background-color 0.15s ease;
+}
+.table-premium tbody tr:hover {
+  background-color: oklch(0.63 0.17 48 / 5%);
+}
+.dark .table-premium tbody tr:hover {
+  background-color: oklch(0.70 0.17 48 / 8%);
+}
+.table-premium thead {
+  background: oklch(0 0 0 / 3%);
+}
+.dark .table-premium thead {
+  background: oklch(1 0 0 / 3%);
+}
+
+/* ─── Dot pulsante "live" ─── */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 2px oklch(0.60 0.16 162 / 25%);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+/* ─── KPI card hover ─── */
+.kpi-card-interactive {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  cursor: default;
+}
+.kpi-card-interactive:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+/* ─── Borde izquierdo naranja en hero ─── */
+.hero-accent-border {
+  border-left: 3px solid oklch(0.63 0.17 48);
+  padding-left: 1rem;
+}
+.dark .hero-accent-border {
+  border-left-color: oklch(0.70 0.17 48);
+}
+
+/* ─── Background gradient sutil dark ─── */
+.dark body {
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% -10%,
+    oklch(0.70 0.17 48 / 6%) 0%,
+    transparent 70%
+  );
+}
+
+/* ─── Estilo de Tarjeta Flotante (sin bordes, con sombra suave) ─── */
+.floating-card {
+  border: none !important;
+  box-shadow: 0 8px 30px -8px oklch(0.14 0.018 255 / 7%), 0 1px 3px oklch(0.14 0.018 255 / 2%) !important;
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s ease !important;
+}
+.floating-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 16px 35px -8px oklch(0.14 0.018 255 / 10%), 0 2px 8px oklch(0.14 0.018 255 / 3%) !important;
+}
+
+.dark .floating-card {
+  box-shadow: 0 16px 40px -12px oklch(0 0 0 / 55%), 0 0 0 1px oklch(1 0 0 / 5%) !important;
+}
+.dark .floating-card:hover {
+  box-shadow: 0 24px 48px -12px oklch(0 0 0 / 65%), 0 0 0 1px oklch(0.70 0.17 48 / 15%) !important;
+}
+

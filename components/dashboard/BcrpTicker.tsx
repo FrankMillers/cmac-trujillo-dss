@@ -43,11 +43,15 @@ export default function BcrpTicker() {
   }
 
   return (
-    <div className="flex items-center gap-6 overflow-x-auto pb-0.5">
+    <div className="flex items-center gap-3 overflow-x-auto pb-0.5 scrollbar-none">
       {items.map((item) => (
-        <div key={item.label} className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-muted-foreground">{item.label}</span>
-          <span className="text-sm font-bold text-foreground">
+        <div 
+          key={item.label} 
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 border border-border/40 shrink-0 shadow-sm transition-all hover:bg-secondary/80 cursor-default"
+        >
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">{item.label}</span>
+          <div className="h-3 w-px bg-border/40" />
+          <span className="text-xs font-bold text-foreground">
             {item.value ?? '—'}{item.value ? ` ${item.unit}` : ''}
           </span>
           {item.trend && item.value && (

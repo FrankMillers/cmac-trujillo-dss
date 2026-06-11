@@ -1,5 +1,5 @@
 import { IndicadorMensual, AlertaRegion, CreditoSegmento } from '@/lib/queries'
-import { AlertTriangle, TrendingUp, TrendingDown, CheckCircle, Zap } from 'lucide-react'
+import { AlertTriangle, TrendingUp, TrendingDown, CheckCircle, Zap, Info } from 'lucide-react'
 
 interface Props {
   indicadores: IndicadorMensual[]
@@ -98,55 +98,74 @@ function generarInsights(
 
 const tipoStyle = {
   critico: {
-    border: 'border-red-500/40',
-    bg: 'bg-red-500/10',
-    icon: <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />,
+    border: 'border-red-500/30',
+    bg: 'bg-gradient-to-br from-red-500/12 to-red-500/5',
+    icon: <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />,
     tag: 'text-red-400',
+    dot: 'bg-red-400',
   },
   alerta: {
-    border: 'border-orange-500/40',
-    bg: 'bg-orange-500/10',
-    icon: <TrendingDown className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />,
+    border: 'border-orange-500/30',
+    bg: 'bg-gradient-to-br from-orange-500/12 to-orange-500/5',
+    icon: <TrendingDown className="w-5 h-5 text-orange-400 shrink-0" />,
     tag: 'text-orange-400',
+    dot: 'bg-orange-400',
   },
   positivo: {
-    border: 'border-emerald-500/40',
-    bg: 'bg-emerald-500/10',
-    icon: <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />,
+    border: 'border-emerald-500/30',
+    bg: 'bg-gradient-to-br from-emerald-500/12 to-emerald-500/5',
+    icon: <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />,
     tag: 'text-emerald-400',
+    dot: 'bg-emerald-400',
   },
   info: {
-    border: 'border-blue-500/40',
-    bg: 'bg-blue-500/10',
-    icon: <TrendingUp className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />,
+    border: 'border-blue-500/30',
+    bg: 'bg-gradient-to-br from-blue-500/12 to-blue-500/5',
+    icon: <Info className="w-5 h-5 text-blue-400 shrink-0" />,
     tag: 'text-blue-400',
+    dot: 'bg-blue-400',
   },
 }
+
+const staggerClass = ['stagger-1', 'stagger-2', 'stagger-3', 'stagger-4']
 
 export default function InsightesNL({ indicadores, alertas, creditos, currentLabel, selectedRegionName }: Props) {
   const insights = generarInsights(indicadores, alertas, creditos)
 
   return (
-    <div className="bg-card rounded-xl p-5 kpi-card-glow">
-      <div className="flex items-center gap-2 mb-4">
-        <Zap className="w-4 h-4 text-primary" />
-        <div>
+    <div className="bg-card rounded-2xl p-5 floating-card animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+      {/* Header glassmorphism strip */}
+      <div className="flex items-center gap-3 mb-5 pb-4 border-b border-border/60">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 shrink-0">
+          <Zap className="w-4 h-4 text-primary" />
+        </div>
+        <div className="min-w-0">
           <h2 className="text-sm font-semibold text-foreground">Análisis en Lenguaje Natural</h2>
-          <p className="text-xs text-muted-foreground">Generado automáticamente · Datos {currentLabel} · DSS CMAC Trujillo</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            Generado automáticamente · Datos {currentLabel}
+          </p>
           {selectedRegionName ? (
-            <p className="text-xs text-primary mt-0.5">Foco territorial activo: {selectedRegionName}</p>
+            <p className="text-xs text-primary font-medium mt-0.5">📍 Foco: {selectedRegionName}</p>
           ) : null}
         </div>
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {insights.map((ins, i) => {
           const s = tipoStyle[ins.tipo]
           return (
-            <div key={i} className={`rounded-lg border ${s.border} ${s.bg} p-3 flex gap-2`}>
-              {s.icon}
+            <div
+              key={i}
+              className={`rounded-xl border ${s.border} ${s.bg} p-4 flex gap-3 animate-fade-in-up ${staggerClass[i]} transition-all hover:scale-[1.01] hover:shadow-sm`}
+            >
+              <div className="shrink-0 mt-0.5">{s.icon}</div>
               <div className="min-w-0">
-                <p className={`text-xs font-semibold mb-1 ${s.tag}`}>{ins.titulo}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{ins.texto}</p>
+                <p className={`text-xs font-bold mb-1.5 uppercase tracking-[0.08em] ${s.tag}`}>
+                  {ins.titulo}
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {ins.texto}
+                </p>
               </div>
             </div>
           )
