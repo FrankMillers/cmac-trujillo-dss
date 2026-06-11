@@ -12,6 +12,7 @@ import CanalesChart from '@/components/dashboard/CanalesChart'
 import AlertasRegion from '@/components/dashboard/AlertasRegion'
 import BcrpTicker from '@/components/dashboard/BcrpTicker'
 import InsightesNL from '@/components/dashboard/InsightesNL'
+import ThemeToggle from '@/components/ThemeToggle'
 import { Separator } from '@/components/ui/separator'
 
 export const dynamic = 'force-dynamic'
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
             </div>
           </div>
           <BcrpTicker />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -52,13 +54,6 @@ export default async function DashboardPage() {
             Indicadores Clave de Desempeño · Mar 2025 <span className="normal-case font-normal">· variación vs Feb 2025</span>
           </p>
           <KpiCards kpis={kpis} prev={kpisPrev} />
-        </section>
-
-        <Separator className="opacity-20" />
-
-        {/* Panel Lenguaje Natural */}
-        <section>
-          <InsightesNL indicadores={indicadores} alertas={alertas} creditos={creditos} />
         </section>
 
         <Separator className="opacity-20" />
@@ -79,8 +74,15 @@ export default async function DashboardPage() {
           <CanalesChart data={canales} />
         </section>
 
+        <Separator className="opacity-20" />
+
+        {/* Panel Lenguaje Natural — análisis ejecutivo */}
+        <section>
+          <InsightesNL indicadores={indicadores} alertas={alertas} creditos={creditos} />
+        </section>
+
         {/* Footer */}
-        <footer className="text-center text-xs text-muted-foreground pb-4">
+        <footer className="text-center text-xs text-muted-foreground pb-4 pt-2">
           Fuentes: SBS Perú (datos financieros) · BCRP API (macroeconómico) · DSS Dashboard — Universidad Nacional de Trujillo 2025
         </footer>
       </main>
