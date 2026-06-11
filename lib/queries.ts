@@ -1,0 +1,134 @@
+import { supabase } from './supabase'
+
+export interface IndicadorMensual {
+  id_tiempo: number
+  mes_anio: string
+  roe_pct: number
+  roa_pct: number
+  ratio_capital_global: number
+  morosidad_pct: number
+  cobertura_provisiones: number
+  cartera_bruta_mm: number
+  patrimonio_mm: number
+  sistema_mora_pct: number
+}
+
+export interface CreditoSegmento {
+  id_segmento: number
+  nombre: string
+  cartera_mm: number
+  mora_pct: number
+  num_clientes: number
+  credito_promedio_soles: number
+}
+
+export interface TransaccionCanal {
+  id_canal: number
+  nombre: string
+  tipo: string
+  num_transacciones_miles: number
+  monto_total_mm: number
+  ticket_promedio_soles: number
+}
+
+export interface AlertaRegion {
+  id_region: number
+  nombre: string
+  agencias: number
+  macrozona: string
+  morosidad_pct: number
+  cartera_mm: number
+  num_clientes: number
+  nivel_riesgo: string
+  variacion_mora_pp: number
+}
+
+export interface KpiActual {
+  roe_pct: number
+  roa_pct: number
+  ratio_capital_global: number
+  morosidad_pct: number
+  cobertura_provisiones: number
+  cartera_bruta_mm: number
+  patrimonio_mm: number
+}
+
+export async function getIndicadoresMensuales(): Promise<IndicadorMensual[]> {
+  const { data, error } = await supabase
+    .from('fact_indicadores_mensual')
+    .select(`
+      id_tiempo,
+      roe_pct, roa_pct, ratio_capital_global,
+      morosidad_pct, cobertura_provisiones,
+      cartera_bruta_mm, patrimonio_mm, sistema_mora_pct,
+      dim_tiempo!inner(mes_anio)
+    `)
+    .order('id_tiempo')
+
+  if (error) throw error
+  return data.map((r: Record<string, unknown>) => ({
+    ...r,
+    mes_anio: (r.dim_tiempo as { mes_anio: string }).mes_anio,
+  })) as IndicadorMensual[]
+}
+
+export async function getCreditosPorSegmento(idTiempo: number): Promise<CreditoSegmento[]> {
+  const { data, error } = await supabase
+    .from('fact_creditos_segmento')
+    .select(`
+      id_segmento, cartera_mm, mora_pct, num_clientes, credito_promedio_soles,
+      dim_segmento!inner(nombre)
+    `)
+    .eq('id_tiempo', idTiempo)
+
+  if (error) throw error
+  return data.map((r: Record<string, unknown>) => ({
+    ...r,
+    nombre: (r.dim_segmento as { nombre: string }).nombre,
+  })) as CreditoSegmento[]
+}
+
+export async function getTransaccionesPorCanal(): Promise<TransaccionCanal[]> {
+  const { data, error } = await supabase
+    .from('fact_transacciones_mensual')
+    .select(`
+      id_canal, num_transacciones_miles, monto_total_mm, ticket_promedio_soles,
+      dim_canal!inner(nombre, tipo)
+    `)
+    .eq('id_tiempo', 24)
+
+  if (error) throw error
+  return data.map((r: Record<string, unknown>) => {
+    const canal = r.dim_canal as { nombre: string; tipo: string }
+    return { ...r, nombre: canal.nombre, tipo: canal.tipo }
+  }) as TransaccionCanal[]
+}
+
+export async function getAlertasRegion(): Promise<AlertaRegion[]> {
+  const { data, error } = await supabase
+    .from('fact_alertas_region')
+    .select(`
+      id_region, morosidad_pct, cartera_mm, num_clientes,
+      nivel_riesgo, variacion_mora_pp,
+      dim_region!inner(nombre, agencias, macrozona)
+    `)
+    .eq('id_tiempo', 24)
+    .order('morosidad_pct', { ascending: false })
+
+  if (error) throw error
+  return data.map((r: Record<string, unknown>) => {
+    const reg = r.dim_region as { nombre: string; agencias: number; macrozona: string }
+    return { ...r, nombre: reg.nombre, agencias: reg.agencias, macrozona: reg.macrozona }
+  }) as AlertaRegion[]
+}
+
+export async function getKpisActuales(): Promise<KpiActual> {
+  const { data, error } = await supabase
+    .from('fact_indicadores_mensual')
+    .select('roe_pct, roa_pct, ratio_capital_global, morosidad_pct, cobertura_provisiones, cartera_bruta_mm, patrimonio_mm')
+    .eq('id_tiempo', 24)
+    .single()
+
+  if (error) throw error
+  return data as KpiActual
+}
