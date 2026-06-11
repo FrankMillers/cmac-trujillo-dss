@@ -13,6 +13,7 @@ import AlertasRegion from '@/components/dashboard/AlertasRegion'
 import BcrpTicker from '@/components/dashboard/BcrpTicker'
 import InsightesNL from '@/components/dashboard/InsightesNL'
 import ThemeToggle from '@/components/ThemeToggle'
+import CmacLogo from '@/components/CmacLogo'
 import { Separator } from '@/components/ui/separator'
 
 export const dynamic = 'force-dynamic'
@@ -33,9 +34,7 @@ export default async function DashboardPage() {
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b border-border px-6 py-3">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <span className="text-primary font-bold text-xs">CM</span>
-            </div>
+            <CmacLogo size={36} />
             <div>
               <h1 className="text-sm font-bold text-foreground leading-none">CMAC Trujillo S.A.</h1>
               <p className="text-xs text-muted-foreground">Dashboard de Decisiones · Cierre Mar 2025</p>

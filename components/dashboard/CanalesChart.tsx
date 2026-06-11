@@ -19,7 +19,8 @@ interface Props {
   data: TransaccionCanal[]
 }
 
-const PALETTE = ['#6b8cff', '#06d6a0', '#ffd166', '#ff6b6b', '#c77dff']
+// Paleta CMAC Trujillo
+const PALETTE = ['#f47920', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 
 export default function CanalesChart({ data }: Props) {
   const pieData = data.map((d, i) => ({
@@ -37,11 +38,11 @@ export default function CanalesChart({ data }: Props) {
   const total = data.reduce((s, d) => s + d.num_transacciones_miles, 0)
 
   const tooltipStyle = {
-    backgroundColor: 'oklch(0.16 0.018 250)',
-    border: '1px solid oklch(1 0 0 / 10%)',
+    backgroundColor: 'var(--card)',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
     fontSize: '12px',
-    color: 'oklch(0.96 0.005 240)',
+    color: 'var(--foreground)',
   }
 
   return (
@@ -78,15 +79,15 @@ export default function CanalesChart({ data }: Props) {
           <p className="text-xs text-muted-foreground mb-2">Monto Movilizado (S/ M)</p>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={barData} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 6%)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} tickLine={false} axisLine={false} width={56} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+              <XAxis type="number" tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} tickLine={false} axisLine={false} width={56} />
               <Tooltip contentStyle={tooltipStyle} />
               <Bar dataKey="monto" radius={[0, 4, 4, 0]}>
                 {barData.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
                 ))}
-                <LabelList dataKey="monto" position="right" style={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} formatter={(v: unknown) => `${Number(v).toFixed(0)}`} />
+                <LabelList dataKey="monto" position="right" style={{ fill: 'var(--muted-foreground)', fontSize: 10 }} formatter={(v: unknown) => `${Number(v).toFixed(0)}`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

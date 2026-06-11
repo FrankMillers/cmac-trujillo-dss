@@ -20,7 +20,8 @@ interface Props {
   data: CreditoSegmento[]
 }
 
-const PALETTE = ['#6b8cff', '#06d6a0', '#ffd166', '#ff6b6b', '#c77dff']
+// Paleta CMAC Trujillo
+const PALETTE = ['#f47920', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 
 export default function CreditosChart({ data }: Props) {
   const barData = data.map((d, i) => ({
@@ -37,11 +38,11 @@ export default function CreditosChart({ data }: Props) {
   }))
 
   const tooltipStyle = {
-    backgroundColor: 'oklch(0.16 0.018 250)',
-    border: '1px solid oklch(1 0 0 / 10%)',
+    backgroundColor: 'var(--card)',
+    border: '1px solid var(--border)',
     borderRadius: '8px',
     fontSize: '12px',
-    color: 'oklch(0.96 0.005 240)',
+    color: 'var(--foreground)',
   }
 
   return (
@@ -55,9 +56,9 @@ export default function CreditosChart({ data }: Props) {
           <p className="text-xs text-muted-foreground mb-2">Saldo de Cartera (S/ M)</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={barData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 6%)" vertical={false} />
-              <XAxis dataKey="name" tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} tickLine={false} axisLine={false} />
               <Tooltip contentStyle={tooltipStyle} />
               <Bar dataKey="Cartera (S/M)" radius={[4, 4, 0, 0]}>
                 {barData.map((entry, idx) => (
@@ -71,9 +72,9 @@ export default function CreditosChart({ data }: Props) {
           <p className="text-xs text-muted-foreground mb-2">Perfil de Morosidad</p>
           <ResponsiveContainer width="100%" height={200}>
             <RadarChart data={radarData} margin={{ top: 4, right: 16, bottom: 4, left: 16 }}>
-              <PolarGrid stroke="oklch(1 0 0 / 10%)" />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }} />
-              <Radar name="Mora %" dataKey="mora" stroke="#ff6b6b" fill="#ff6b6b" fillOpacity={0.25} />
+              <PolarGrid stroke="var(--border)" />
+              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} />
+              <Radar name="Mora %" dataKey="mora" stroke="#ef4444" fill="#ef4444" fillOpacity={0.22} />
               <Tooltip contentStyle={tooltipStyle} />
             </RadarChart>
           </ResponsiveContainer>

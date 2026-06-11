@@ -17,11 +17,12 @@ interface Props {
   data: IndicadorMensual[]
 }
 
+// Paleta CMAC Trujillo
 const COLORS = {
-  roe: '#6b8cff',
-  mora: '#ff6b6b',
-  sistema: '#ffd166',
-  cartera: '#06d6a0',
+  cartera: '#f47920',  // naranja corporativo CMAC
+  roe:     '#3b82f6',  // azul
+  mora:    '#ef4444',  // rojo (indicador negativo)
+  sistema: '#f59e0b',  // ámbar (referencia sistema)
 }
 
 export default function EvolucionChart({ data }: Props) {
@@ -47,17 +48,17 @@ export default function EvolucionChart({ data }: Props) {
               <stop offset="95%" stopColor={COLORS.cartera} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 6%)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="mes"
-            tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             interval={3}
           />
           <YAxis
             yAxisId="pct"
-            tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -65,13 +66,13 @@ export default function EvolucionChart({ data }: Props) {
           <YAxis
             yAxisId="mm"
             orientation="right"
-            tick={{ fill: 'oklch(0.60 0.02 240)', fontSize: 10 }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `${v}`}
           />
           <Legend
-            wrapperStyle={{ fontSize: '11px', color: 'oklch(0.70 0.02 240)' }}
+            wrapperStyle={{ fontSize: '11px', color: 'var(--muted-foreground)' }}
           />
           <Area
             yAxisId="mm"
@@ -86,11 +87,11 @@ export default function EvolucionChart({ data }: Props) {
           <Line yAxisId="pct" type="monotone" dataKey="Sistema mora" stroke={COLORS.sistema} strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'oklch(0.16 0.018 250)',
-              border: '1px solid oklch(1 0 0 / 10%)',
+              backgroundColor: 'var(--card)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               fontSize: '12px',
-              color: 'oklch(0.96 0.005 240)',
+              color: 'var(--foreground)',
             }}
           />
         </ComposedChart>
