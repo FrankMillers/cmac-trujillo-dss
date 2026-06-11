@@ -11,17 +11,19 @@ import CreditosChart from '@/components/dashboard/CreditosChart'
 import CanalesChart from '@/components/dashboard/CanalesChart'
 import AlertasRegion from '@/components/dashboard/AlertasRegion'
 import BcrpTicker from '@/components/dashboard/BcrpTicker'
+import InsightesNL from '@/components/dashboard/InsightesNL'
 import { Separator } from '@/components/ui/separator'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const [indicadores, creditos, canales, alertas, kpis] = await Promise.all([
+  const [indicadores, creditos, canales, alertas, kpis, kpisPrev] = await Promise.all([
     getIndicadoresMensuales(),
     getCreditosPorSegmento(24),
     getTransaccionesPorCanal(),
     getAlertasRegion(),
-    getKpisActuales(),
+    getKpisActuales(24),
+    getKpisActuales(23),
   ])
 
   return (
@@ -47,9 +49,16 @@ export default async function DashboardPage() {
         {/* KPIs */}
         <section>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-            Indicadores Clave de Desempeño · Mar 2025
+            Indicadores Clave de Desempeño · Mar 2025 <span className="normal-case font-normal">· variación vs Feb 2025</span>
           </p>
-          <KpiCards kpis={kpis} />
+          <KpiCards kpis={kpis} prev={kpisPrev} />
+        </section>
+
+        <Separator className="opacity-20" />
+
+        {/* Panel Lenguaje Natural */}
+        <section>
+          <InsightesNL indicadores={indicadores} alertas={alertas} creditos={creditos} />
         </section>
 
         <Separator className="opacity-20" />

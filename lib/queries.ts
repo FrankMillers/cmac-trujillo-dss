@@ -122,11 +122,11 @@ export async function getAlertasRegion(): Promise<AlertaRegion[]> {
   }) as AlertaRegion[]
 }
 
-export async function getKpisActuales(): Promise<KpiActual> {
+export async function getKpisActuales(idTiempo = 24): Promise<KpiActual> {
   const { data, error } = await supabase
     .from('fact_indicadores_mensual')
     .select('roe_pct, roa_pct, ratio_capital_global, morosidad_pct, cobertura_provisiones, cartera_bruta_mm, patrimonio_mm')
-    .eq('id_tiempo', 24)
+    .eq('id_tiempo', idTiempo)
     .single()
 
   if (error) throw error

@@ -1,27 +1,40 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Shield, AlertTriangle, DollarSign, Landmark } from 'lucide-react'
+import { TrendingUp, TrendingDown, Shield, AlertTriangle, DollarSign, Landmark, Minus } from 'lucide-react'
 import { KpiActual } from '@/lib/queries'
 
 interface Props {
   kpis: KpiActual
+  prev?: KpiActual
 }
 
 interface KpiItem {
   label: string
   value: string
   sub: string
+  delta?: string
+  deltaPos?: boolean
   icon: React.ReactNode
   glow: string
   trend: 'up' | 'down' | 'neutral'
 }
 
-export default function KpiCards({ kpis }: Props) {
+function fmt(n: number, prev: number | undefined, suffix: string, higherIsBad = false): string | undefined {
+  if (prev === undefined) return undefined
+  const d = n - prev
+  if (Math.abs(d) < 0.001) return undefined
+  const sign = d > 0 ? '+' : ''
+  return `${sign}${d.toFixed(2)}${suffix}`
+}
+
+export default function KpiCards({ kpis, prev }: Props) {
   const items: KpiItem[] = [
     {
       label: 'ROE',
       value: `${kpis.roe_pct.toFixed(1)}%`,
       sub: 'Retorno sobre patrimonio',
+      delta: fmt(kpis.roe_pct, prev?.roe_pct, 'pp'),
+      deltaPos: prev ? kpis.roe_pct >= prev.roe_pct : undefined,
       icon: <TrendingUp className="w-5 h-5" />,
       glow: 'kpi-card-glow-green',
       trend: 'up',
@@ -30,6 +43,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'ROA',
       value: `${kpis.roa_pct.toFixed(1)}%`,
       sub: 'Retorno sobre activos',
+      delta: fmt(kpis.roa_pct, prev?.roa_pct, 'pp'),
+      deltaPos: prev ? kpis.roa_pct >= prev.roa_pct : undefined,
       icon: <DollarSign className="w-5 h-5" />,
       glow: 'kpi-card-glow-green',
       trend: 'up',
@@ -38,6 +53,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'Ratio Capital Global',
       value: `${kpis.ratio_capital_global.toFixed(2)}%`,
       sub: 'Requerimiento mín. 10%',
+      delta: fmt(kpis.ratio_capital_global, prev?.ratio_capital_global, 'pp'),
+      deltaPos: prev ? kpis.ratio_capital_global >= prev.ratio_capital_global : undefined,
       icon: <Shield className="w-5 h-5" />,
       glow: 'kpi-card-glow',
       trend: 'neutral',
@@ -46,6 +63,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'Morosidad',
       value: `${kpis.morosidad_pct.toFixed(1)}%`,
       sub: 'Cartera en riesgo',
+      delta: fmt(kpis.morosidad_pct, prev?.morosidad_pct, 'pp', true),
+      deltaPos: prev ? kpis.morosidad_pct <= prev.morosidad_pct : undefined,
       icon: <AlertTriangle className="w-5 h-5" />,
       glow: 'kpi-card-glow-red',
       trend: 'down',
@@ -54,6 +73,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'Cobertura Provisiones',
       value: `${kpis.cobertura_provisiones.toFixed(1)}%`,
       sub: 'Provisiones / Cartera mora',
+      delta: fmt(kpis.cobertura_provisiones, prev?.cobertura_provisiones, 'pp'),
+      deltaPos: prev ? kpis.cobertura_provisiones >= prev.cobertura_provisiones : undefined,
       icon: <Shield className="w-5 h-5" />,
       glow: 'kpi-card-glow-amber',
       trend: 'neutral',
@@ -62,6 +83,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'Cartera Bruta',
       value: `S/ ${kpis.cartera_bruta_mm.toLocaleString()}M`,
       sub: 'Saldo total créditos',
+      delta: prev ? `${kpis.cartera_bruta_mm >= prev.cartera_bruta_mm ? '+' : ''}${(kpis.cartera_bruta_mm - prev.cartera_bruta_mm).toFixed(0)}M` : undefined,
+      deltaPos: prev ? kpis.cartera_bruta_mm >= prev.cartera_bruta_mm : undefined,
       icon: <Landmark className="w-5 h-5" />,
       glow: 'kpi-card-glow',
       trend: 'up',
@@ -70,6 +93,8 @@ export default function KpiCards({ kpis }: Props) {
       label: 'Patrimonio',
       value: `S/ ${kpis.patrimonio_mm.toFixed(1)}M`,
       sub: 'Capital regulatorio',
+      delta: prev ? `${kpis.patrimonio_mm >= prev.patrimonio_mm ? '+' : ''}${(kpis.patrimonio_mm - prev.patrimonio_mm).toFixed(1)}M` : undefined,
+      deltaPos: prev ? kpis.patrimonio_mm >= prev.patrimonio_mm : undefined,
       icon: <Landmark className="w-5 h-5" />,
       glow: 'kpi-card-glow',
       trend: 'up',
@@ -80,12 +105,6 @@ export default function KpiCards({ kpis }: Props) {
     up: 'text-emerald-400',
     down: 'text-red-400',
     neutral: 'text-blue-400',
-  }
-
-  const trendIcon = {
-    up: <TrendingUp className="w-3 h-3" />,
-    down: <TrendingDown className="w-3 h-3" />,
-    neutral: null,
   }
 
   return (
@@ -102,9 +121,19 @@ export default function KpiCards({ kpis }: Props) {
             <div className="text-2xl font-bold text-foreground leading-none">{item.value}</div>
             <div className="text-xs text-muted-foreground mt-1">{item.label}</div>
           </div>
-          <div className={`flex items-center gap-1 text-xs ${trendColor[item.trend]}`}>
-            {trendIcon[item.trend]}
-            <span className="truncate">{item.sub}</span>
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-xs text-muted-foreground truncate">{item.sub}</span>
+            {item.delta && (
+              <span className={`text-xs font-semibold shrink-0 flex items-center gap-0.5 ${item.deltaPos ? 'text-emerald-400' : 'text-red-400'}`}>
+                {item.deltaPos ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                {item.delta}
+              </span>
+            )}
+            {!item.delta && (
+              <span className="text-xs text-muted-foreground shrink-0 flex items-center gap-0.5">
+                <Minus className="w-3 h-3" />
+              </span>
+            )}
           </div>
         </div>
       ))}
